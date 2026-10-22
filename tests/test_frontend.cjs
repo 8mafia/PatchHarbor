@@ -1,0 +1,10 @@
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const source=fs.readFileSync('static/app.js','utf8').split('\n').filter(l=>l.startsWith('function parsePorts(')||l.startsWith('function parseHosts(')).join('\n');
+const context={};vm.createContext(context);vm.runInContext(source,context);
+const plain=x=>JSON.parse(JSON.stringify(x));
+assert.deepEqual(plain(context.parsePorts('22,2222,2200,2022')),[22,2222,2200,2022]);
+assert.deepEqual(plain(context.parsePorts('۲۲ ۲۲۲۲')),[22,2222]);
+for(const value of ['0','65536','22,23,24,25,26','word'])assert.throws(()=>context.parsePorts(value));
+const rows=plain(context.parseHosts('192.0.2.1\n192.0.2.2:2200|2022\n[2001:db8::1]:2222\n192.0.2.3,22|2222,root,rooot','22,2222',{username:'root',username2:'rooot',passwords:['fake']}));
+assert.equal(rows.length,4);assert.deepEqual(rows[0].ports,[22,2222]);assert.deepEqual(rows[1].ports,[2200,2022]);assert.equal(rows[2].host,'2001:db8::1');assert.equal(rows[3].username2,'rooot');
+console.log('Frontend port/list parser checks passed.');

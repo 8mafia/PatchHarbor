@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="patch-token" content="__TOKEN__"><title>میز به‌روزرسانی سرورها</title>
+  <link rel="stylesheet" href="/static/style.css"><script defer src="/static/app.js"></script>
+</head>
+<body>
+<header><a class="brand" href="/">میز به‌روزرسانی<span lang="en" dir="ltr">PATCH DESK</span></a><nav aria-label="راهنمای برنامه"><a href="/help" target="_blank" rel="noopener">راهنمای استفاده و پچ دستی</a></nav></header>
+<main>
+  <section class="intro"><div><h1>لیست IPها را بده؛ بقیه با ابزار.</h1><p>ثبت خودکار، بررسی هر سرور و آپدیت در صورت نیاز. سرورهای به‌روز با وضعیت «اوکی» مشخص می‌شوند.</p></div><button id="add" class="secondary">افزودن تکی</button></section>
+  <div id="message" role="status" aria-live="polite" hidden></div>
+  <section class="editor" aria-labelledby="batch-title"><div class="section-head"><h2 id="batch-title">بررسی و به‌روزرسانی خودکار از روی لیست</h2></div><form id="batch-form" autocomplete="off"><div class="form-grid">
+    <label class="wide">لیست IPها؛ هر خط یک سرور<textarea name="hosts" dir="ltr" rows="6" required placeholder="192.0.2.10&#10;192.0.2.11:2222&#10;192.0.2.12,2200,root,rooot"></textarea></label>
+    <div class="wide"><label>پورت‌های SSH؛ حداکثر چهار پورت<input name="port" type="text" value="22" placeholder="22,2222,2200,2022" required dir="ltr"></label><p class="hint">پورت متفاوت هر خط: <bdi>IP:2222|2200</bdi><br>کاربر متفاوت: <bdi>IP,22|2222,root,rooot</bdi><br>ابزار فقط همین پورت‌های مشخص‌شده را امتحان می‌کند و پورت موفق در اولویت اتصال بعدی می‌ماند.</p></div>
+    <label>کاربر اول<input name="username" dir="ltr" value="root" required></label><label>کاربر دوم، اختیاری<input name="username2" dir="ltr" value="rooot"></label>
+    <label>رمز مشترک اول<input name="password1" type="password" dir="ltr" autocomplete="new-password"></label><label>رمز مشترک دوم، اختیاری<input name="password2" type="password" dir="ltr" autocomplete="new-password"></label><label>رمز مشترک سوم، اختیاری<input name="password3" type="password" dir="ltr" autocomplete="new-password"></label>
+    <label>تعداد سرور هم‌زمان<select name="parallel"><option value="1" selected>۱؛ به‌ترتیب لیست</option><option value="2">۲ سرور</option><option value="3">۳ سرور</option><option value="4">۴ سرور</option><option value="6">۶ سرور</option></select></label>
+  </div><details><summary>رمزهای سرورها متفاوت‌اند؟</summary><p class="hint">لیست IP را وارد کنید و دکمه زیر را بزنید. برای هر سرور می‌توانید رمز جدا بنویسید؛ فیلد خالی از رمزهای مشترک استفاده می‌کند.</p><button id="prepare-overrides" type="button" class="secondary">نمایش فیلد رمز هر سرور</button><div id="batch-overrides" class="form-grid"></div></details><label class="check"><input name="fallback" type="checkbox" checked>اگر mirror فعلی مشکل داشت، مخزن رسمی همان توزیع را امتحان کن</label>
+  <p class="hint">با شروع، اگر آپدیت لازم باشد بسته‌های PHP و سرویس‌های Compose قابل‌شناسایی به‌روزرسانی و سرویس مربوط restart می‌شود. image سفارشی یا tag ثابت قدیمی ممکن است نیاز به اصلاح داشته باشد. پیش از شروع، backup داشته باشید. اثر انگشت خودکار پذیرفته و رمز sudo از رمز ورود موفق گرفته می‌شود.</p>
+  <button type="submit">افزودن و شروع خودکار</button></form></section>
+  <section id="editor" class="editor" hidden aria-labelledby="form-title">
+    <div class="section-head"><h2 id="form-title">مشخصات اتصال</h2><button id="close-editor" class="secondary">بستن</button></div>
+    <form id="server-form" autocomplete="off">
+      <input type="hidden" name="id">
+      <div class="form-grid">
+        <label>نام سرور<input name="name" required maxlength="80" placeholder="مثلاً وب‌سرور اصلی"></label>
+        <label>IP یا نام میزبان<input name="host" dir="ltr" required placeholder="192.0.2.10"></label>
+        <label>پورت‌های SSH؛ حداکثر چهار پورت<input name="port" dir="ltr" required type="text" value="22" placeholder="22,2222,2200,2022"></label>
+        <label>کاربر اول<input name="username" dir="ltr" required autocomplete="off" value="root" placeholder="root"></label>
+        <label>کاربر دوم، اختیاری<input name="username2" dir="ltr" autocomplete="off" value="rooot" placeholder="rooot"></label>
+        <label>رمز SSH<input name="password1" type="password" dir="ltr" required autocomplete="new-password"></label>
+        <label>رمز جایگزین دوم، اختیاری<input name="password2" type="password" dir="ltr" autocomplete="new-password"></label>
+        <label>رمز جایگزین سوم، اختیاری<input name="password3" type="password" dir="ltr" autocomplete="new-password"></label>
+        <label class="wide">نشانی تست سلامت برنامه، اختیاری<input name="health_url" type="url" dir="ltr" placeholder="https://example.com/health"></label>
+      </div>
+      <p class="hint">هر دو کاربر با رمزهای واردشده امتحان می‌شوند؛ ورود موفق برای اتصال بعدی در اولویت می‌ماند. رمز sudo همان رمز ورود موفق است. اثر انگشت SSH خودکار پذیرفته می‌شود. حداکثر ۶ تلاش ناموفق ممکن است حساب را قفل کند؛ رمزها فقط در حافظه‌اند.</p>
+      <button type="submit">ثبت اتصال</button>
+    </form>
+  </section>
+  <section class="workspace">
+    <div class="register">
+      <div class="section-head"><h2>فهرست سرورها <span id="count">۰</span></h2><button class="secondary" id="refresh">بازخوانی</button></div>
+      <div class="table-scroll"><table><thead><tr><th><input type="checkbox" id="select-all" aria-label="انتخاب همه سرورها"></th><th>سرور و اتصال</th><th>سیستم / وضعیت</th><th>عملیات</th></tr></thead><tbody id="servers"></tbody></table></div>
+      <div class="empty" id="empty"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="7" width="34" height="13" rx="2"/><rect x="7" y="28" width="34" height="13" rx="2"/><path d="M13 13h2m4 0h2m-8 21h2m4 0h2M24 20v8"/></svg><h3>هنوز سروری ثبت نشده</h3><p>مشخصات اتصال را وارد کنید. تأیید اثر انگشت و امتحان‌کردن کاربران به‌صورت خودکار انجام می‌شود.</p><button class="secondary" id="empty-add">ثبت اولین سرور</button></div>
+      <div class="bulk"><span id="selected-count">۰ انتخاب‌شده</span><button id="inspect-selected" class="secondary">شناسایی انتخاب‌ها</button><button id="plan-selected" class="secondary">ساخت برنامه انتخاب‌ها</button><button id="delete-selected" class="danger" disabled>حذف انتخاب‌شده‌ها</button></div>
+    </div>
+    <aside aria-labelledby="settings-title"><h2 id="settings-title">تنظیم برنامه عملیات</h2>
+      <label>دامنه به‌روزرسانی<select id="mode"><option value="php">فقط بسته‌های PHP میزبان</option><option value="system">همه بسته‌های میزبان</option><option value="compose">یک سرویس Docker Compose</option></select></label>
+      <div id="compose-options" hidden><label>پوشه پروژه Compose<input id="compose-dir" dir="ltr" placeholder="/opt/myapp"></label><label>نام سرویس<input id="compose-service" dir="ltr" placeholder="app"></label><p class="hint">image تنظیم‌شده دریافت می‌شود. برای image سفارشی ابتدا باید نسخه اصلاح‌شده ساخته و منتشر شود.</p></div>
+      <label class="check"><input type="checkbox" id="fallback">در صورت خطای mirror، مخزن رسمی همان توزیع را موقتاً امتحان کن</label>
+      <p class="hint">تنظیم مخزن شما بازنویسی نمی‌شود. بررسی امضا و TLS حفظ می‌شود. مخزن رسمی لزوماً بسته شخص ثالث یا PHP قدیمی را ندارد.</p>
+      <label>حداکثر سرور هم‌زمان<select id="parallel"><option value="1">۱ سرور</option><option value="2">۲ سرور</option><option value="3" selected>۳ سرور</option><option value="4">۴ سرور</option><option value="5">۵ سرور</option><option value="6">۶ سرور</option></select></label>
+      <label class="check"><input type="checkbox" id="stop-failure" checked>با اولین خطا، مراحل بعدی صف متوقف شوند</label>
+      <label class="check"><input type="checkbox" id="backup">backup یا snapshot قابل بازیابی برای سرورهای انتخاب‌شده دارم</label>
+      <button id="execute" class="full" aria-describedby="execute-status">به‌روزرسانی انتخاب‌ها</button>
+      <p id="execute-status" class="hint" role="status">سرورهای موردنظر را از فهرست انتخاب کنید.</p>
+      <p class="hint">اجرای مرحله جاری قطع نمی‌شود. ارتقای نسخه توزیع و reboot خودکار انجام نمی‌شود. پس از هر تغییر تنظیمات، برنامه را دوباره بسازید.</p>
+    </aside>
+  </section>
+  <section id="details" class="details" hidden><div class="section-head"><h2 id="details-title">جزئیات سرور</h2><button id="close-details" class="secondary">بستن جزئیات</button></div><div id="details-content"></div></section>
+  <section id="review" class="details" hidden aria-labelledby="review-title"><div class="section-head"><h2 id="review-title">آماده شروع به‌روزرسانی</h2></div><div id="review-content"></div><div class="bulk"><button id="start-reviewed">شروع به‌روزرسانی</button><button id="cancel-review" class="secondary">انصراف</button></div></section>
+  <section class="jobs" id="job-history"><div class="section-head"><h2>عملیات و شواهد اجرا</h2><button id="export" class="secondary">دریافت گزارش JSON</button></div><div id="jobs"><p class="hint">هنوز عملیاتی اجرا نشده است.</p></div></section>
+  <footer><p>قواعد اولیه PHP: ‏۲۱ اکتبر ۲۰۲۶ · موفقیت آپدیت به‌تنهایی تأیید رفع CVE نیست.</p><a href="https://www.php.net/archive/2026.php" target="_blank" rel="noreferrer">اطلاعیه رسمی PHP</a></footer>
+</main>
+</body></html>

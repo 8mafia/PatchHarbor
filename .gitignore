@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+.pytest_cache/
+data/
+*.log
+/.publish/
+/dist/
+/AGENT_HANDOFF.md
+/PRODUCT.md
+/report-review-*.md
+/preview*.png
+/.env
+/.env.*
+*.pem
+*.key
+*.p12

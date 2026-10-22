@@ -1,0 +1,6 @@
+fastapi>=0.115,<1
+uvicorn>=0.34,<1
+paramiko>=3.5,<5
+packaging>=24,<27
+httpx>=0.28,<1
+pytest>=8,<10

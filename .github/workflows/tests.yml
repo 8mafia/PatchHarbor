@@ -1,0 +1,27 @@
+name: Tests
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements-lock.txt
+      - run: python -m pytest -q
+      - run: node tests/test_frontend.cjs
+      - run: bash -n install.sh
+      - run: bash install.sh --dry-run
+      - name: Install controller on disposable Linux runner
+        run: |
+          sudo bash install.sh
+          curl --fail --silent http://127.0.0.1:8765/help >/dev/null
+          sudo -u patchdesk test -w /var/lib/patch-desk
+          sudo -u patchdesk test ! -w /opt/patch-desk/app.py
+          sudo systemctl stop patch-desk
